@@ -77,7 +77,7 @@
           <div><dt>库内条数</dt><dd id="railTotal">—</dd></div>
         </dl>
         <div class="update-hint">
-          <strong>更新方式：</strong><span id="railSchedule">按需更新，需更新时重新抓取并发布</span>
+          <strong>更新方式：</strong><span id="railSchedule">自动更新（交易日盘中每 10 分钟 / 非交易时段每天 6 次）</span>
         </div>
       </div>
 
@@ -114,19 +114,19 @@
     <div class="modal-body">
       <h3>更新频率</h3>
       <ul>
-        <li>当前版本是<b>静态快照</b>：页面显示发布时的抓取结果，<b>不会自动刷新</b>。</li>
-        <li>需要更新时，由维护者重新运行抓取脚本并发布一次。</li>
-        <li>资讯覆盖最近 7 天、最多 1500 条。</li>
-        <li>免费接口在抓取时通常有 1–5 分钟的发布延迟。</li>
+        <li>页面数据由 <b>GitHub Actions 定时抓取</b>并自动提交，GitHub Pages 随后自动重新发布。</li>
+        <li>交易日盘中（北京时间 09:00–11:50、13:00–15:50）每 10 分钟更新一次。</li>
+        <li>非交易时段每天更新 6 次。</li>
+        <li>资讯覆盖最近 7 天、最多 1500 条；免费接口在抓取时通常有 1–5 分钟的发布延迟。</li>
       </ul>
 
       <h3>更新方式</h3>
       <ol>
-        <li>运行 <code>python fetch_news.py</code> 抓取并生成 <code>data/news.js</code>。</li>
-        <li>把 <code>index.html</code>、<code>assets/</code>、<code>data/news.js</code> 重新发布到静态托管。</li>
-        <li>刷新页面即可看到新的快照。</li>
+        <li>工作流运行 <code>python fetch_news.py</code> 抓取并生成 <code>data/news.js</code>。</li>
+        <li>脚本结果自动提交回仓库。</li>
+        <li>GitHub Pages 自动重建，刷新页面即可看到新的快照。</li>
       </ol>
-      <p class="deploy-note">当前不启用任何定时任务、GitHub Actions 或云函数；托管端只负责发文件，不参与数据抓取。</p>
+      <p class="deploy-note">自动化由仓库内 <code>.github/workflows/update-news.yml</code> 承担，只做抓取与提交；托管端只负责发文件，不参与数据抓取。</p>
 
       <h3>本地运行</h3>
       <pre>python fetch_news.py            # 抓取一次，更新 data/news.js
@@ -134,7 +134,7 @@
 
       <h3>更及时的条件</h3>
       <ul>
-        <li>自动更新需要常驻设备或云函数定时执行，当前版本未启用。</li>
+        <li>10 分钟级已是免费接口 + GitHub Actions 的合理上限（Actions 定时任务本身还可能有几分钟排队延迟）。</li>
         <li>秒级 / 盘中即时需要付费行情与资讯授权（交易所 Level-2、持牌数据商），免费接口做不到。</li>
       </ul>
 
