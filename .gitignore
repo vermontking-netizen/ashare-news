@@ -1,0 +1,7 @@
+data/news.json
+logs/
+__pycache__/
+*.tmp
+preview*.png
+.screenshots/
+.trae-html-share-packages/

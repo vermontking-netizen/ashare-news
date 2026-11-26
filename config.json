@@ -1,0 +1,16 @@
+{
+  "watchlist": [
+    { "code": "600519", "name": "贵州茅台" },
+    { "code": "300750", "name": "宁德时代" },
+    { "code": "002594", "name": "比亚迪" },
+    { "code": "688981", "name": "中芯国际" },
+    { "code": "300059", "name": "东方财富" }
+  ],
+  "keep_days": 7,
+  "max_output_items": 1500,
+  "flash_page_size": 60,
+  "market_page_size": 40,
+  "announcement_page_size": 60,
+  "report_page_size": 60,
+  "stock_news_page_size": 12
+}

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A股资讯聚合 · 快讯/市场/个股/公告/研报</title>
+<meta name="description" content="A股资讯聚合站点：汇集东方财富、新浪财经的7×24快讯、市场新闻、个股新闻、公告与研报，按时间倒序展示，可分类筛选并跳转原文。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1420'/%3E%3Cpath d='M16 46 30 16h5l14 30h-6l-3-7H25l-3 7zm11-12h11l-5.5-13z' fill='%234f8cff'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">A</div>
+      <div class="brand-text">
+        <h1>A股资讯聚合</h1>
+        <p>快讯 · 市场 · 个股 · 公告 · 研报</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="live-pill" id="livePill" title="数据更新时间">
+        <span class="dot" id="liveDot"></span>
+        <span id="updateText">加载数据…</span>
+      </div>
+      <button class="btn" id="refreshBtn" type="button" title="重新加载页面（不会抓取新数据）">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        重新加载
+      </button>
+      <button class="btn primary" id="aboutBtn" type="button">更新说明</button>
+    </div>
+  </header>
+
+  <div class="toolbar" id="toolbar">
+    <nav class="tabs" id="tabs" aria-label="资讯分类">
+      <button class="tab active" data-cat="all" type="button">全部 <span class="count" data-count="all">0</span></button>
+      <button class="tab" data-cat="flash" type="button">快讯 <span class="count" data-count="flash">0</span></button>
+      <button class="tab" data-cat="market" type="button">市场 <span class="count" data-count="market">0</span></button>
+      <button class="tab" data-cat="stock" type="button">个股 <span class="count" data-count="stock">0</span></button>
+      <button class="tab" data-cat="ann" type="button">公告 <span class="count" data-count="ann">0</span></button>
+      <button class="tab" data-cat="report" type="button">研报 <span class="count" data-count="report">0</span></button>
+    </nav>
+    <div class="filters">
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16.5 16.5 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="搜索标题 / 摘要 / 股票代码 / 来源　按 / 聚焦" autocomplete="off" aria-label="搜索资讯">
+        <button class="clear" id="clearSearch" type="button" aria-label="清空搜索" hidden>×</button>
+      </div>
+      <select id="sourceSelect" aria-label="按来源筛选">
+        <option value="all">全部来源</option>
+      </select>
+      <label class="toggle"><input type="checkbox" id="todayOnly"><span>仅今日</span></label>
+      <label class="toggle"><input type="checkbox" id="importantOnly"><span>仅重要</span></label>
+    </div>
+  </div>
+
+  <main class="layout">
+    <section class="feed-wrap" aria-live="polite">
+      <div class="feed-summary" id="feedSummary"></div>
+      <div class="feed" id="feed"></div>
+      <div class="load-more-wrap"><button class="load-more" id="loadMore" type="button" hidden>加载更多</button></div>
+      <div class="empty" id="empty" hidden>
+        <div class="empty-icon">⌕</div>
+        <h3>没有匹配的资讯</h3>
+        <p>试试更换分类、清空搜索，或取消“仅今日 / 仅重要”筛选。</p>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <div class="card">
+        <div class="card-head"><h2>更新状态</h2><span class="status-badge" id="sourceBadge">—</span></div>
+        <dl class="kv">
+          <div><dt>最近更新</dt><dd id="railUpdated">—</dd></div>
+          <div><dt>最新资讯</dt><dd id="railLatest">—</dd></div>
+          <div><dt>本次新增</dt><dd id="railNew">—</dd></div>
+          <div><dt>库内条数</dt><dd id="railTotal">—</dd></div>
+        </dl>
+        <div class="update-hint">
+          <strong>更新方式：</strong><span id="railSchedule">按需更新，需更新时重新抓取并发布</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>数据源</h2></div>
+        <ul class="source-list" id="sourceList"></ul>
+      </div>
+
+      <div class="card tips">
+        <div class="card-head"><h2>使用提示</h2></div>
+        <ul>
+          <li>标题与「原文」均跳转原始页面，不转载全文。</li>
+          <li>按 <kbd>/</kbd> 聚焦搜索，<kbd>Esc</kbd> 清空。</li>
+          <li>「重要」依据关键词（减持、回购、中标、业绩、停牌等）自动标注，仅作提示。</li>
+          <li>资讯仅供参考，不构成任何投资建议。</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <span>A股资讯聚合 · 6 个免费内容源 · 数据仅供研究参考</span>
+    <span id="footMeta"></span>
+  </footer>
+</div>
+
+<div class="modal" id="aboutModal" hidden>
+  <div class="modal-mask" data-close="1"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <div class="modal-head">
+      <h2 id="aboutTitle">更新与部署说明</h2>
+      <button class="btn ghost" id="closeAbout" type="button" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body">
+      <h3>更新频率</h3>
+      <ul>
+        <li>当前版本是<b>静态快照</b>：页面显示发布时的抓取结果，<b>不会自动刷新</b>。</li>
+        <li>需要更新时，由维护者重新运行抓取脚本并发布一次。</li>
+        <li>资讯覆盖最近 7 天、最多 1500 条。</li>
+        <li>免费接口在抓取时通常有 1–5 分钟的发布延迟。</li>
+      </ul>
+
+      <h3>更新方式</h3>
+      <ol>
+        <li>运行 <code>python fetch_news.py</code> 抓取并生成 <code>data/news.js</code>。</li>
+        <li>把 <code>index.html</code>、<code>assets/</code>、<code>data/news.js</code> 重新发布到静态托管。</li>
+        <li>刷新页面即可看到新的快照。</li>
+      </ol>
+      <p class="deploy-note">当前不启用任何定时任务、GitHub Actions 或云函数；托管端只负责发文件，不参与数据抓取。</p>
+
+      <h3>本地运行</h3>
+      <pre>python fetch_news.py            # 抓取一次，更新 data/news.js
+# 然后双击 index.html 查看</pre>
+
+      <h3>更及时的条件</h3>
+      <ul>
+        <li>自动更新需要常驻设备或云函数定时执行，当前版本未启用。</li>
+        <li>秒级 / 盘中即时需要付费行情与资讯授权（交易所 Level-2、持牌数据商），免费接口做不到。</li>
+      </ul>
+
+      <h3>内容源</h3>
+      <table class="src-table">
+        <thead><tr><th>类别</th><th>来源</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>快讯</td><td>东方财富 7×24、新浪财经 7×24</td><td>全市场滚动快讯</td></tr>
+          <tr><td>市场</td><td>新浪财经滚动（财经 / 股市）</td><td>市场与宏观新闻</td></tr>
+          <tr><td>个股</td><td>东方财富个股新闻</td><td>按 watchlist 抓取</td></tr>
+          <tr><td>公告</td><td>东方财富公告（沪深 A 股）</td><td>公告标题、公司、类型、原文链接</td></tr>
+          <tr><td>研报</td><td>东方财富研报</td><td>机构、评级、行业、原文链接</td></tr>
+        </tbody>
+      </table>
+
+      <h3>自定义自选股</h3>
+      <p>编辑 <code>config.json</code> 的 <code>watchlist</code>（最多 10 只，6 位代码 + 名称），运行一次 <code>fetch_news.py</code> 后生效；在线版需要重新发布。</p>
+
+      <p class="disclaimer">免责声明：本站仅聚合公开资讯的标题与摘要，版权归原发布方所有；内容可能存在延迟、遗漏或错误，不构成投资建议。</p>
+    </div>
+  </div>
+</div>
+
+<script src="data/news.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
